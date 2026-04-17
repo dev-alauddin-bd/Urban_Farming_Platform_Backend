@@ -1,14 +1,14 @@
 import { prisma } from "../../lib/prisma.js";
 import { paginationHelpers } from "../../utils/pagination.js";
-// ===================================== Create Produce =====================================
-const createProduce = async (data, user) => {
+// =============================  Create Rental Space =============================
+const createRentalSpace = async (data, user) => {
     const vendor = await prisma.vendorProfile.findUnique({
         where: { userId: user.id },
     });
     if (!vendor) {
         throw new Error('Vendor profile not found!');
     }
-    const result = await prisma.produce.create({
+    const result = await prisma.rentalSpace.create({
         data: {
             ...data,
             vendorId: vendor.id,
@@ -16,8 +16,8 @@ const createProduce = async (data, user) => {
     });
     return result;
 };
-// ===================================== Get All Produces =====================================
-const getAllProduces = async (filters, options) => {
+// =============================  Get All Rental Spaces =============================
+const getAllRentalSpaces = async (filters, options) => {
     const { limit, page, skip, sortBy, sortOrder } = paginationHelpers.calculatePagination(options);
     const { searchTerm, ...filterData } = filters;
     const andConditions = [];
@@ -25,13 +25,7 @@ const getAllProduces = async (filters, options) => {
         andConditions.push({
             OR: [
                 {
-                    name: {
-                        contains: searchTerm,
-                        mode: 'insensitive',
-                    },
-                },
-                {
-                    description: {
+                    location: {
                         contains: searchTerm,
                         mode: 'insensitive',
                     },
@@ -49,7 +43,7 @@ const getAllProduces = async (filters, options) => {
         });
     }
     const whereConditions = andConditions.length > 0 ? { AND: andConditions } : {};
-    const result = await prisma.produce.findMany({
+    const result = await prisma.rentalSpace.findMany({
         where: whereConditions,
         skip,
         take: limit,
@@ -60,7 +54,7 @@ const getAllProduces = async (filters, options) => {
             vendor: true,
         },
     });
-    const total = await prisma.produce.count({
+    const total = await prisma.rentalSpace.count({
         where: whereConditions,
     });
     return {
@@ -72,22 +66,17 @@ const getAllProduces = async (filters, options) => {
         data: result,
     };
 };
-// ===================================== Get Single Produce =====================================
-const getSingleProduceFromDB = async (id) => {
-    const result = await prisma.produce.findUnique({
-        where: {
-            id,
-            isDeleted: false,
-        },
-        include: {
-            vendor: true,
-        },
+// =============================  Get Single Rental Space =============================
+const getSingleRentalSpace = async (id) => {
+    const result = await prisma.rentalSpace.findUnique({
+        where: { id },
+        include: { vendor: true },
     });
     return result;
 };
-// ===================================== Update Produce =====================================
-const updateProduceInDB = async (id, payload) => {
-    const result = await prisma.produce.update({
+// =============================  Update Rental Space =============================
+const updateRentalSpaceInDB = async (id, payload) => {
+    const result = await prisma.rentalSpace.update({
         where: {
             id,
         },
@@ -95,9 +84,9 @@ const updateProduceInDB = async (id, payload) => {
     });
     return result;
 };
-// ===================================== Delete Produce =====================================
-const deleteProduceFromDB = async (id) => {
-    const result = await prisma.produce.update({
+// =============================  Delete Rental Space =============================
+const deleteRentalSpaceFromDB = async (id) => {
+    const result = await prisma.rentalSpace.update({
         where: {
             id,
         },
@@ -107,12 +96,11 @@ const deleteProduceFromDB = async (id) => {
     });
     return result;
 };
-// ===================================== Export Produce Service =====================================
-export const ProduceService = {
-    createProduce,
-    getAllProduces,
-    getSingleProduceFromDB,
-    updateProduceInDB,
-    deleteProduceFromDB,
+export const RentalSpaceService = {
+    createRentalSpace,
+    getAllRentalSpaces,
+    getSingleRentalSpace,
+    updateRentalSpaceInDB,
+    deleteRentalSpaceFromDB,
 };
-//# sourceMappingURL=produce.service.js.map
+//# sourceMappingURL=rentalSpace.service.js.map

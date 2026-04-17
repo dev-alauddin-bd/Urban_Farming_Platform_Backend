@@ -54,16 +54,17 @@ model User {
 // ======================Vendor Profile Model =========================
 
 model VendorProfile {
-  id                  String   @id @default(uuid())
-  userId              String   @unique
-  user                User     @relation(fields: [userId], references: [id])
+  id                  String        @id @default(uuid())
+  userId              String        @unique
+  user                User          @relation(fields: [userId], references: [id])
   farmName            String
   farmLocation        String
   certificationStatus String
-  isDeleted           Boolean  @default(false)
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
+  isDeleted           Boolean       @default(false)
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
   produce             Produce?
+  rentalSpaces        RentalSpace[]
 
   @@index([userId])
   @@index([farmName])
@@ -92,4 +93,23 @@ model Produce {
   @@index([vendorId])
   @@index([isDeleted])
   @@map("produces")
+}
+
+// ======================Rental Space Model =========================
+
+model RentalSpace {
+  id           String        @id @default(uuid())
+  vendorId     String
+  vendor       VendorProfile @relation(fields: [vendorId], references: [id])
+  location     String
+  size         String
+  price        Float
+  availability Boolean       @default(true)
+  isDeleted    Boolean       @default(false)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  @@index([vendorId])
+  @@index([isDeleted])
+  @@map("rental_spaces")
 }

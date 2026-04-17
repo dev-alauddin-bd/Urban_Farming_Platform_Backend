@@ -1,7 +1,7 @@
-import { RentalSpace, UserRole } from '@prisma/client';
-import { paginationHelpers } from '../../../utils/pagination';
-import { prisma } from '../../../lib/prisma';
-
+import { RentalSpace } from "@prisma/client";
+import { prisma } from "../../lib/prisma.js";
+import { paginationHelpers } from "../../utils/pagination.js";
+// =============================  Create Rental Space =============================
 const createRentalSpace = async (data: any, user: any): Promise<RentalSpace> => {
     const vendor = await prisma.vendorProfile.findUnique({
         where: { userId: user.id },
@@ -21,6 +21,7 @@ const createRentalSpace = async (data: any, user: any): Promise<RentalSpace> => 
     return result;
 };
 
+// =============================  Get All Rental Spaces =============================
 const getAllRentalSpaces = async (filters: any, options: any) => {
     const { limit, page, skip, sortBy, sortOrder } =
         paginationHelpers.calculatePagination(options);
@@ -81,6 +82,7 @@ const getAllRentalSpaces = async (filters: any, options: any) => {
     };
 };
 
+// =============================  Get Single Rental Space =============================
 const getSingleRentalSpace = async (id: string): Promise<RentalSpace | null> => {
     const result = await prisma.rentalSpace.findUnique({
         where: { id },
@@ -89,8 +91,37 @@ const getSingleRentalSpace = async (id: string): Promise<RentalSpace | null> => 
     return result;
 };
 
+// =============================  Update Rental Space =============================
+const updateRentalSpaceInDB = async (
+    id: string,
+    payload: Partial<RentalSpace>,
+): Promise<RentalSpace> => {
+    const result = await prisma.rentalSpace.update({
+        where: {
+            id,
+        },
+        data: payload,
+    });
+    return result;
+};
+
+// =============================  Delete Rental Space =============================
+const deleteRentalSpaceFromDB = async (id: string): Promise<RentalSpace> => {
+    const result = await prisma.rentalSpace.update({
+        where: {
+            id,
+        },
+        data: {
+            isDeleted: true,
+        },
+    });
+    return result;
+};
+
 export const RentalSpaceService = {
     createRentalSpace,
     getAllRentalSpaces,
     getSingleRentalSpace,
+    updateRentalSpaceInDB,
+    deleteRentalSpaceFromDB,
 };

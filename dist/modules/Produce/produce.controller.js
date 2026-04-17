@@ -3,6 +3,7 @@ import catchAsync from '../../utils/catchAsync.js';
 import sendResponse from '../../utils/sendResponse.js';
 import { ProduceService } from './produce.service.js';
 import pick from '../../utils/pick.js';
+// ===================================== Create Produce =====================================
 const createProduce = catchAsync(async (req, res) => {
     const result = await ProduceService.createProduce(req.body, req.user);
     sendResponse(res, {
@@ -12,6 +13,7 @@ const createProduce = catchAsync(async (req, res) => {
         data: result,
     });
 });
+// ===================================== Get All Produces =====================================
 const getAllProduces = catchAsync(async (req, res) => {
     const filters = pick(req.query, ['searchTerm', 'category', 'certificationStatus']);
     const options = pick(req.query, ['limit', 'page', 'sortBy', 'sortOrder']);
@@ -24,6 +26,7 @@ const getAllProduces = catchAsync(async (req, res) => {
         data: result.data,
     });
 });
+// ===================================== Get Single Produce =====================================
 const getSingleProduce = catchAsync(async (req, res) => {
     const { id } = req.params;
     const result = await ProduceService.getSingleProduceFromDB(id);
@@ -34,6 +37,7 @@ const getSingleProduce = catchAsync(async (req, res) => {
         data: result,
     });
 });
+// ===================================== Update Produce =====================================
 const updateProduce = catchAsync(async (req, res) => {
     const { id } = req.params;
     const result = await ProduceService.updateProduceInDB(id, req.body);
@@ -44,6 +48,7 @@ const updateProduce = catchAsync(async (req, res) => {
         data: result,
     });
 });
+// ===================================== Delete Produce =====================================
 const deleteProduce = catchAsync(async (req, res) => {
     const { id } = req.params;
     const result = await ProduceService.deleteProduceFromDB(id);
@@ -54,6 +59,7 @@ const deleteProduce = catchAsync(async (req, res) => {
         data: result,
     });
 });
+// ===================================== Export Produce Controller =====================================
 export const ProduceController = {
     createProduce,
     getAllProduces,
