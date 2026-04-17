@@ -34,7 +34,7 @@ const getSingleUser = catchAsync(async (req: Request, res: Response) => {
 // ==================== Get My Profile ====================
 
 const getMyProfile = catchAsync(async (req: Request, res: Response) => {
-    const user = (req as any).user;
+    const user = req.user;
     const result = await UserService.getMyProfileFromDB(user);
 
     sendResponse(res, {
@@ -48,7 +48,7 @@ const getMyProfile = catchAsync(async (req: Request, res: Response) => {
 // ==================== Update My Profile ====================
 
 const updateMyProfile = catchAsync(async (req: Request, res: Response) => {
-    const user = (req as any).user;
+    const user = req.user;
     const result = await UserService.updateMyProfileInDB(user, req.body);
 
     sendResponse(res, {

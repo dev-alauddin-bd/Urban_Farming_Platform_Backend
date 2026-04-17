@@ -1,11 +1,11 @@
-import { User } from "@prisma/client";
 import { LoginPayload } from "../../interfaces/auth.interfaces.js";
+import { RegistrationPayload } from "../../interfaces/auth.interfaces.js";
 export declare const AuthService: {
-    registerUser: (payload: User) => Promise<{
+    registerUser: (payload: RegistrationPayload) => Promise<{
+        name: string;
         id: string;
         email: string;
         role: import("@prisma/client").$Enums.UserRole;
-        name: string;
         status: import("@prisma/client").$Enums.UserStatus;
         isDeleted: boolean;
         createdAt: Date;
@@ -15,10 +15,10 @@ export declare const AuthService: {
         accessToken: string;
         refreshToken: string;
         user: {
+            name: string;
             id: string;
             email: string;
             role: import("@prisma/client").$Enums.UserRole;
-            name: string;
             status: import("@prisma/client").$Enums.UserStatus;
             isDeleted: boolean;
             createdAt: Date;

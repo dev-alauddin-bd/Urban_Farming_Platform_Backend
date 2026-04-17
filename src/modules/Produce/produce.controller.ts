@@ -1,0 +1,75 @@
+import { Request, Response } from 'express';
+import httpStatus from 'http-status';
+import catchAsync from '../../utils/catchAsync.js';
+import sendResponse from '../../utils/sendResponse.js';
+import { ProduceService } from './produce.service.js';
+import pick from '../../utils/pick.js';
+
+const createProduce = catchAsync(async (req: Request, res: Response) => {
+    const result = await ProduceService.createProduce(req.body, req.user);
+    sendResponse(res, {
+        statusCode: httpStatus.CREATED,
+        success: true,
+        message: 'Produce listed successfully!',
+        data: result,
+    });
+});
+
+
+const getAllProduces = catchAsync(async (req: Request, res: Response) => {
+    const filters = pick(req.query, ['searchTerm', 'category', 'certificationStatus']);
+    const options = pick(req.query, ['limit', 'page', 'sortBy', 'sortOrder']);
+
+    const result = await ProduceService.getAllProduces(filters, options);
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: 'Produces fetched successfully!',
+        meta: result.meta,
+        data: result.data,
+    });
+});
+
+const getSingleProduce = catchAsync(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const result = await ProduceService.getSingleProduceFromDB(id as string);
+
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: 'Produce fetched successfully!',
+        data: result,
+    });
+});
+
+const updateProduce = catchAsync(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const result = await ProduceService.updateProduceInDB(id as string, req.body);
+
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: 'Produce updated successfully!',
+        data: result,
+    });
+});
+
+const deleteProduce = catchAsync(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const result = await ProduceService.deleteProduceFromDB(id as string);
+
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: 'Produce deleted successfully!',
+        data: result,
+    });
+});
+
+export const ProduceController = {
+    createProduce,
+    getAllProduces,
+    getSingleProduce,
+    updateProduce,
+    deleteProduce,
+};

@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import config from "../config/index.js";
 import AppError from "../error/AppError.js";
 import catchAsync from "../utils/catchAsync.js";
+// =============================== Auth middleware ===============================
 const auth = (...requiredRoles) => {
     return catchAsync(async (req, res, next) => {
         let token = req.headers.authorization || req.cookies?.accessToken;

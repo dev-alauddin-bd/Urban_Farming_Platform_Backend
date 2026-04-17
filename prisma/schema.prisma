@@ -25,6 +25,12 @@ enum UserStatus {
   BLOCKED
 }
 
+enum CertificationStatus {
+  APPROVED
+  PENDING
+  REJECTED
+}
+
 // ======================User Model =========================
 
 model User {
@@ -57,6 +63,7 @@ model VendorProfile {
   isDeleted           Boolean  @default(false)
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
+  produce             Produce?
 
   @@index([userId])
   @@index([farmName])
@@ -64,4 +71,25 @@ model VendorProfile {
   @@index([certificationStatus])
   @@index([isDeleted])
   @@map("vendor_profiles")
+}
+
+// ======================Produce Model =========================
+
+model Produce {
+  id                  String              @id @default(uuid())
+  name                String
+  description         String
+  price               Decimal             @db.Decimal(10, 2)
+  category            String
+  availableQuantity   Int
+  vendorId            String              @unique
+  vendor              VendorProfile       @relation(fields: [vendorId], references: [id])
+  certificationStatus CertificationStatus
+  isDeleted           Boolean             @default(false)
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+
+  @@index([vendorId])
+  @@index([isDeleted])
+  @@map("produces")
 }

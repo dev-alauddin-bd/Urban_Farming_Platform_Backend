@@ -2,6 +2,7 @@ import { User, UserRole, UserStatus } from "@prisma/client";
 import { prisma } from "../../lib/prisma.js";
 import AppError from "../../error/AppError.js";
 import httpStatus from "http-status";
+import { TokenPayload } from "../../utils/generateTokens.js";
 
 /**
  * Get all users from DB
@@ -61,7 +62,7 @@ const getSingleUserFromDB = async (id: string) => {
  * @param user User payload from token
  * @returns User profile
  */
-const getMyProfileFromDB = async (user: any) => {
+const getMyProfileFromDB = async (user: TokenPayload) => {
     const result = await prisma.user.findUnique({
         where: {
             id: user.id,
@@ -92,7 +93,7 @@ const getMyProfileFromDB = async (user: any) => {
  * @param payload Update data
  * @returns Updated user
  */
-const updateMyProfileInDB = async (user: any, payload: Partial<User>) => {
+const updateMyProfileInDB = async (user: TokenPayload, payload: Partial<User>) => {
     // 1. Check if user exists
     const isExistUser = await prisma.user.findUnique({
         where: {

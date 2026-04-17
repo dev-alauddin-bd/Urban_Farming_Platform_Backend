@@ -7,8 +7,9 @@ import config from "../../config/index.js";
 import { LoginPayload } from "../../interfaces/auth.interfaces.js";
 import generateTokens, { TokenPayload } from "../../utils/generateTokens.js";
 import { verifyRefreshToken } from "../../utils/verifyTokens.js";
+import { RegistrationPayload } from "../../interfaces/auth.interfaces.js";
 // ================= REGISTER =================
-const registerUser = async (payload: User) => {
+const registerUser = async (payload: RegistrationPayload) => {
     // 1. check if user already exists by email
     const isExistUser = await prisma.user.findUnique({
         where: { email: payload.email },
@@ -48,8 +49,8 @@ const registerUser = async (payload: User) => {
             await tx.vendorProfile.create({
                 data: {
                     userId: newUser.id,
-                    farmName: (payload as any).farmName || "N/A",
-                    farmLocation: (payload as any).farmLocation || "N/A",
+                    farmName: payload.farmName || "N/A",
+                    farmLocation: payload.farmLocation || "N/A",
                     certificationStatus: "PENDING",
                 },
             });

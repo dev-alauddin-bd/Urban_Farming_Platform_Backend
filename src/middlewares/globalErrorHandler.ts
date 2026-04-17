@@ -3,17 +3,20 @@ import config from "../config/index.js";
 import AppError from "../error/AppError.js";
 import { Prisma } from "@prisma/client";
 
+type IErrorMessage = {
+  path: string | number;
+  message: string;
+};
+
 const globalErrorHandler = (
-  error: any,
+  error: Error,
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   let statusCode = 500;
   let message = "Something went wrong!";
-  let errorMessages: any[] = [];
-
- 
+  let errorMessages: IErrorMessage[] = [];
 
   // ================= PRISMA ERROR =================
    if (error instanceof Prisma.PrismaClientKnownRequestError) {
