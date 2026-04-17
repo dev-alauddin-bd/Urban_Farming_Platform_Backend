@@ -1,32 +1,48 @@
-import config from '../config/index.js';
+import config from "../config/index.js";
+import AppError from "../error/AppError.js";
+import { Prisma } from "@prisma/client";
 const globalErrorHandler = (error, req, res, next) => {
     let statusCode = 500;
-    let message = 'Something went wrong!';
+    let message = "Something went wrong!";
     let errorMessages = [];
-    if (error?.name === 'ZodError') {
+    // ================= PRISMA ERROR =================
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
         statusCode = 400;
-        message = 'Validation Error';
-        errorMessages = error.issues.map((issue) => ({
-            path: issue.path[issue.path.length - 1],
-            message: issue.message,
-        }));
+        message = "Database Error";
+        errorMessages = [
+            {
+                path: "",
+                message: error.message,
+            },
+        ];
     }
+    // ================= CUSTOM APP ERROR =================
+    else if (error instanceof AppError) {
+        statusCode = error.statusCode;
+        message = error.message;
+        errorMessages = [
+            {
+                path: "",
+                message: error.message,
+            },
+        ];
+    }
+    // ================= NORMAL ERROR =================
     else if (error instanceof Error) {
-        message = error?.message;
-        errorMessages = error?.message
-            ? [
-                {
-                    path: '',
-                    message: error?.message,
-                },
-            ]
-            : [];
+        message = error.message;
+        errorMessages = [
+            {
+                path: "",
+                message: error.message,
+            },
+        ];
     }
+    // ================= RESPONSE =================
     res.status(statusCode).json({
         success: false,
         message,
         errorMessages,
-        stack: config.env !== 'production' ? error?.stack : undefined,
+        stack: config.env !== "production" ? error.stack : undefined,
     });
 };
 export default globalErrorHandler;

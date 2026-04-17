@@ -1,25 +1,22 @@
 import jwt, { Secret, SignOptions } from "jsonwebtoken"
 import config from "../config/index.js";
-//  jwt payload
+import { UserRole } from "@prisma/client";
 
 export interface TokenPayload {
     id: string;
     email: string;
-    role: string;
+    role: UserRole;
 }
-
 
 // ============================== Generate Tokens ==============================
 
 const generateTokens = (payload: TokenPayload) => {
-
 
     // =========================== Access token ============================
 
     const accessToken = jwt.sign({ ...payload }, config.jwt_access_secret as Secret, {
         expiresIn: config.jwt_access_expires_in as SignOptions['expiresIn']
     })
-
 
     // ========================== Refresh Token ============================
 
@@ -31,7 +28,3 @@ const generateTokens = (payload: TokenPayload) => {
 
 }
 export default generateTokens;
-
-
-
-

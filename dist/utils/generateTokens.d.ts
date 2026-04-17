@@ -1,7 +1,8 @@
+import { UserRole } from "@prisma/client";
 export interface TokenPayload {
     id: string;
     email: string;
-    role: string;
+    role: UserRole;
 }
 declare const generateTokens: (payload: TokenPayload) => {
     accessToken: string;
