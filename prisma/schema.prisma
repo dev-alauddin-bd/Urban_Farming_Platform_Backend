@@ -5,7 +5,6 @@
 
 generator client {
   provider = "prisma-client-js"
-
 }
 
 datasource db {
@@ -21,6 +20,7 @@ enum UserRole {
 }
 
 enum UserStatus {
+  PENDING
   ACTIVE
   BLOCKED
 }
@@ -28,19 +28,40 @@ enum UserStatus {
 // ======================User Model =========================
 
 model User {
-  id        String     @id @default(uuid())
-  name      String
-  email     String     @unique
-  password  String
-  role      UserRole   @default(CUSTOMER)
-  status    UserStatus @default(ACTIVE)
-  isDeleted Boolean    @default(false)
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  id            String         @id @default(uuid())
+  name          String
+  email         String         @unique
+  password      String
+  role          UserRole       @default(CUSTOMER)
+  status        UserStatus     @default(ACTIVE)
+  isDeleted     Boolean        @default(false)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  vendorProfile VendorProfile?
 
-  @@index([email])
   @@index([role])
   @@index([status])
   @@index([isDeleted])
   @@map("users")
+}
+
+// ======================Vendor Profile Model =========================
+
+model VendorProfile {
+  id                  String   @id @default(uuid())
+  userId              String   @unique
+  user                User     @relation(fields: [userId], references: [id])
+  farmName            String
+  farmLocation        String
+  certificationStatus String
+  isDeleted           Boolean  @default(false)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@index([userId])
+  @@index([farmName])
+  @@index([farmLocation])
+  @@index([certificationStatus])
+  @@index([isDeleted])
+  @@map("vendor_profiles")
 }

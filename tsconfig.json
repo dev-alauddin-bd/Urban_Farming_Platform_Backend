@@ -3,7 +3,7 @@
   "compilerOptions": {
     "rootDir": "./src",
     "outDir": "./dist",
-    "module": "nodenext",
+    "module": "NodeNext",
     "target": "es2022",
     "moduleResolution": "nodenext",
     "esModuleInterop": true,
@@ -11,7 +11,7 @@
     "sourceMap": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
-    "skipLibCheck": true,
+    "skipLibCheck": true
   },
   "include": [
     "src/**/*"
