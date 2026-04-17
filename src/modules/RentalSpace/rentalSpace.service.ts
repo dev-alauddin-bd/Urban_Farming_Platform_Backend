@@ -1,8 +1,23 @@
-import { RentalSpace } from "@prisma/client";
+import { Prisma, RentalSpace } from "@prisma/client";
 import { prisma } from "../../lib/prisma.js";
 import { paginationHelpers } from "../../utils/pagination.js";
+import { TokenPayload } from "../../utils/generateTokens.js";
+
+type IRentalSpaceFilterRequest = {
+    searchTerm?: string;
+    location?: string;
+    availability?: boolean | string;
+};
+
+type IPaginationOptions = {
+    page?: number;
+    limit?: number;
+    sortBy?: string;
+    sortOrder?: 'asc' | 'desc';
+};
+
 // =============================  Create Rental Space =============================
-const createRentalSpace = async (data: any, user: any): Promise<RentalSpace> => {
+const createRentalSpace = async (data: RentalSpace, user: TokenPayload): Promise<RentalSpace> => {
     const vendor = await prisma.vendorProfile.findUnique({
         where: { userId: user.id },
     });
@@ -22,13 +37,13 @@ const createRentalSpace = async (data: any, user: any): Promise<RentalSpace> => 
 };
 
 // =============================  Get All Rental Spaces =============================
-const getAllRentalSpaces = async (filters: any, options: any) => {
+const getAllRentalSpaces = async (filters: IRentalSpaceFilterRequest, options: IPaginationOptions) => {
     const { limit, page, skip, sortBy, sortOrder } =
         paginationHelpers.calculatePagination(options);
 
     const { searchTerm, ...filterData } = filters;
 
-    const andConditions = [];
+    const andConditions: Prisma.RentalSpaceWhereInput[] = [];
 
     if (searchTerm) {
         andConditions.push({
@@ -45,19 +60,25 @@ const getAllRentalSpaces = async (filters: any, options: any) => {
 
     if (Object.keys(filterData).length > 0) {
         andConditions.push({
-            AND: Object.keys(filterData).map((key) => ({
-                [key]: {
-                    equals: (filterData as any)[key],
-                },
-            })),
+            AND: (Object.keys(filterData) as (keyof typeof filterData)[]).map((key) => {
+                let value = filterData[key];
+                if (key === 'availability') {
+                    value = value === 'true' || value === true;
+                }
+                return {
+                    [key]: {
+                        equals: value,
+                    },
+                };
+            }),
         });
     }
 
-    const whereConditions =
+    const whereConditions: Prisma.RentalSpaceWhereInput =
         andConditions.length > 0 ? { AND: andConditions } : {};
 
     const result = await prisma.rentalSpace.findMany({
-        where: whereConditions as any,
+        where: whereConditions,
         skip,
         take: limit,
         orderBy: {
@@ -69,7 +90,7 @@ const getAllRentalSpaces = async (filters: any, options: any) => {
     });
 
     const total = await prisma.rentalSpace.count({
-        where: whereConditions as any,
+        where: whereConditions,
     });
 
     return {

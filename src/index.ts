@@ -6,7 +6,12 @@ import path from "path";
 import router from "./routes/index.js";
 import globalErrorHandler from "./middlewares/globalErrorHandler.js";
 
+import { setupSwagger } from "./utils/swagger.js";
+
 const app: Application = express();
+
+// ================= SWAGGER =================
+setupSwagger(app as any);
 
 // ================= CORS =================
 app.use(

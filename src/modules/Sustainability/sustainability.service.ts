@@ -1,10 +1,16 @@
 import { CertificationStatus, SustainabilityCert } from '@prisma/client';
 import { prisma } from '../../lib/prisma.js';
+import { TokenPayload } from '../../utils/generateTokens.js';
 
+type IUploadCertificationRequest = {
+    certifyingAgency: string;
+    certificationDate: string;
+    fileUrl: string;
+};
 
 // ==================== Upload Certification ====================
 
-const uploadCertification = async (data: any, user: any): Promise<SustainabilityCert> => {
+const uploadCertification = async (data: IUploadCertificationRequest, user: TokenPayload): Promise<SustainabilityCert> => {
     const vendor = await prisma.vendorProfile.findUnique({
         where: { userId: user.id },
     });
@@ -16,12 +22,14 @@ const uploadCertification = async (data: any, user: any): Promise<Sustainability
     const result = await prisma.sustainabilityCert.create({
         data: {
             ...data,
+            certificationDate: new Date(data.certificationDate),
             vendorId: vendor.id,
         },
     });
 
     return result;
 };
+
 // ==================== Get All Certifications ====================
 const getAllCertifications = async () => {
     const result = await prisma.sustainabilityCert.findMany({
@@ -29,6 +37,7 @@ const getAllCertifications = async () => {
     });
     return result;
 };
+
 // ==================== Validate Certification ====================
 const validateCertification = async (id: string, data: { status: CertificationStatus }) => {
     const result = await prisma.sustainabilityCert.update({
@@ -45,6 +54,7 @@ const validateCertification = async (id: string, data: { status: CertificationSt
 
     return result;
 };
+
 // ==================== Export Service ====================
 
 export const SustainabilityService = {

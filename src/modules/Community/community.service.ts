@@ -1,10 +1,22 @@
 import { paginationHelpers } from '../../utils/pagination.js';
 import { prisma } from '../../lib/prisma.js';
 import { CommunityPost } from '@prisma/client';
+import { TokenPayload } from '../../utils/generateTokens.js';
+
+type ICommunityPostRequest = {
+    postContent: string;
+};
+
+type IPaginationOptions = {
+    page?: number;
+    limit?: number;
+    sortBy?: string;
+    sortOrder?: 'asc' | 'desc';
+};
 
 // ==================== Create Post ====================
 
-const createPost = async (data: any, user: any): Promise<CommunityPost> => {
+const createPost = async (data: ICommunityPostRequest, user: TokenPayload): Promise<CommunityPost> => {
     const result = await prisma.communityPost.create({
         data: {
             userId: user.id,
@@ -15,7 +27,7 @@ const createPost = async (data: any, user: any): Promise<CommunityPost> => {
 };
 
 // ==================== Get All Posts ====================
-const getAllPosts = async (options: any) => {
+const getAllPosts = async (options: IPaginationOptions) => {
     const { limit, page, skip, sortBy, sortOrder } =
         paginationHelpers.calculatePagination(options);
 

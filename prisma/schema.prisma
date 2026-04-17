@@ -31,6 +31,13 @@ enum CertificationStatus {
   REJECTED
 }
 
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+}
+
+
 // ======================User Model =========================
 
 model User {
@@ -45,6 +52,8 @@ model User {
   updatedAt      DateTime        @updatedAt
   vendorProfile  VendorProfile?
   communityPosts CommunityPost[]
+  orders         Order[]
+  plants         Plant[]
 
   @@index([role])
   @@index([status])
@@ -91,6 +100,7 @@ model Produce {
   isDeleted           Boolean             @default(false)
   createdAt           DateTime            @default(now())
   updatedAt           DateTime            @updatedAt
+  orders              Order[]
 
   @@index([vendorId])
   @@index([isDeleted])
@@ -150,3 +160,46 @@ model SustainabilityCert {
   @@index([isDeleted])
   @@map("sustainability_certs")
 }
+
+//  ========================= Order Model =========================
+
+model Order {
+  id         String      @id @default(uuid())
+  produceId  String
+  produce    Produce     @relation(fields: [produceId], references: [id])
+  customerId String
+  customer   User        @relation(fields: [customerId], references: [id])
+  quantity   Int
+  totalPrice Decimal     @db.Decimal(10, 2)
+  status     OrderStatus @default(PENDING)
+  isDeleted  Boolean     @default(false)
+  orderDate  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  @@index([produceId])
+  @@index([customerId])
+  @@index([isDeleted])
+  @@map("orders")
+}
+
+// ====================== Plant Model =========================
+
+model Plant {
+  id              String    @id @default(uuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id])
+  name            String
+  species         String?
+  plantingDate    DateTime  @default(now())
+  expectedHarvest DateTime?
+  status          String    @default("GROWING")
+  healthStatus    String    @default("HEALTHY")
+  isDeleted       Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([isDeleted])
+  @@map("plants")
+}
+

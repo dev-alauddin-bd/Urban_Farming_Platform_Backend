@@ -5,6 +5,8 @@ import { ProduceRoutes } from '../modules/Produce/produce.route.js';
 import { SustainabilityRoutes } from '../modules/Sustainability/sustainability.route.js';
 import { CommunityRoutes } from '../modules/Community/community.route.js';
 import { RentalSpaceRoutes } from '../modules/RentalSpace/rentalSpace.route.js';
+import { OrderRoutes } from '../modules/Order/order.route.js';
+import { PlantRoutes } from '../modules/Plant/plant.route.js';
 
 const router: Router = express.Router();
 
@@ -32,6 +34,14 @@ const moduleRoutes = [
     {
         path: '/rentalSpaces',
         route: RentalSpaceRoutes
+    },
+    {
+        path: '/orders',
+        route: OrderRoutes,
+    },
+    {
+        path: '/plants',
+        route: PlantRoutes,
     }
 
 ];
