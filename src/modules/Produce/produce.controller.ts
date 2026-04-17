@@ -5,6 +5,8 @@ import sendResponse from '../../utils/sendResponse.js';
 import { ProduceService } from './produce.service.js';
 import pick from '../../utils/pick.js';
 
+
+// ===================================== Create Produce =====================================
 const createProduce = catchAsync(async (req: Request, res: Response) => {
     const result = await ProduceService.createProduce(req.body, req.user);
     sendResponse(res, {
@@ -16,6 +18,7 @@ const createProduce = catchAsync(async (req: Request, res: Response) => {
 });
 
 
+// ===================================== Get All Produces =====================================
 const getAllProduces = catchAsync(async (req: Request, res: Response) => {
     const filters = pick(req.query, ['searchTerm', 'category', 'certificationStatus']);
     const options = pick(req.query, ['limit', 'page', 'sortBy', 'sortOrder']);
@@ -30,6 +33,9 @@ const getAllProduces = catchAsync(async (req: Request, res: Response) => {
     });
 });
 
+
+
+// ===================================== Get Single Produce =====================================
 const getSingleProduce = catchAsync(async (req: Request, res: Response) => {
     const { id } = req.params;
     const result = await ProduceService.getSingleProduceFromDB(id as string);
@@ -42,6 +48,7 @@ const getSingleProduce = catchAsync(async (req: Request, res: Response) => {
     });
 });
 
+// ===================================== Update Produce =====================================
 const updateProduce = catchAsync(async (req: Request, res: Response) => {
     const { id } = req.params;
     const result = await ProduceService.updateProduceInDB(id as string, req.body);
@@ -54,6 +61,7 @@ const updateProduce = catchAsync(async (req: Request, res: Response) => {
     });
 });
 
+// ===================================== Delete Produce =====================================
 const deleteProduce = catchAsync(async (req: Request, res: Response) => {
     const { id } = req.params;
     const result = await ProduceService.deleteProduceFromDB(id as string);
@@ -66,6 +74,7 @@ const deleteProduce = catchAsync(async (req: Request, res: Response) => {
     });
 });
 
+// ===================================== Export Produce Controller =====================================
 export const ProduceController = {
     createProduce,
     getAllProduces,

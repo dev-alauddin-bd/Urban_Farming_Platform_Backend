@@ -16,6 +16,7 @@ type IPaginationOptions = {
     sortOrder?: 'asc' | 'desc';
 };
 
+// ===================================== Create Produce =====================================
 const createProduce = async (data: Produce, user: TokenPayload): Promise<Produce> => {
     const vendor = await prisma.vendorProfile.findUnique({
         where: { userId: user.id },
@@ -35,6 +36,7 @@ const createProduce = async (data: Produce, user: TokenPayload): Promise<Produce
     return result;
 };
 
+// ===================================== Get All Produces =====================================
 const getAllProduces = async (filters: IProduceFilterRequest, options: IPaginationOptions) => {
     const { limit, page, skip, sortBy, sortOrder } =
         paginationHelpers.calculatePagination(options);
@@ -101,6 +103,7 @@ const getAllProduces = async (filters: IProduceFilterRequest, options: IPaginati
     };
 };
 
+// ===================================== Get Single Produce =====================================
 const getSingleProduceFromDB = async (id: string) => {
     const result = await prisma.produce.findUnique({
         where: {
@@ -115,6 +118,7 @@ const getSingleProduceFromDB = async (id: string) => {
     return result;
 };
 
+// ===================================== Update Produce =====================================
 const updateProduceInDB = async (id: string, payload: Partial<Produce>) => {
     const result = await prisma.produce.update({
         where: {
@@ -126,6 +130,7 @@ const updateProduceInDB = async (id: string, payload: Partial<Produce>) => {
     return result;
 };
 
+// ===================================== Delete Produce =====================================
 const deleteProduceFromDB = async (id: string) => {
     const result = await prisma.produce.update({
         where: {
@@ -139,6 +144,7 @@ const deleteProduceFromDB = async (id: string) => {
     return result;
 };
 
+// ===================================== Export Produce Service =====================================
 export const ProduceService = {
     createProduce,
     getAllProduces,
