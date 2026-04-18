@@ -4,11 +4,11 @@ import path from "path";
 import { Express } from "express";
 
 export const setupSwagger = (app: Express) => {
-  const swaggerDocument = YAML.load(
-    path.join(process.cwd(), "docs/swagger.yaml")
-  );
+  const swaggerPath = path.join(process.cwd(), "docs/swagger.yaml");
+
+  const swaggerDocument = YAML.load(swaggerPath);
 
   app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-  console.log("📖 Swagger: https://urban-farming-platform-backend-rosy.vercel.app/api-docs");
+  console.log("📖 Swagger UI running at /api-docs");
 };
