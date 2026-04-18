@@ -6,11 +6,12 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
+    "start": "node dist/index.js",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate deploy",
-    "start": "node dist/index.js",
-    "seed": "ts-node src/db/seed.ts",
-    "benchmark": "k6 run benchmark.js"
+    "seed": "tsx src/scripts/seed.ts",
+    "cleanup": "tsx src/scripts/cleanup.ts",
+    "benchmark": "k6 run src/scripts/benchmark.ts"
   },
   "keywords": [],
   "author": "",
@@ -21,6 +22,7 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
+    "@types/k6": "^1.7.0",
     "@types/node": "^25.6.0",
     "@types/node-cache": "^4.1.3",
     "@types/pg": "^8.20.0",

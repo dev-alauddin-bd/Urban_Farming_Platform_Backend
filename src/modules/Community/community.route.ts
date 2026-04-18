@@ -2,6 +2,7 @@ import express, { Router } from 'express';
 import { CommunityController } from './community.controller.js';
 import auth from '../../middlewares/auth.js';
 import { UserRole } from '@prisma/client';
+import { communityLimiter } from '../../middlewares/rateLimiter.js';
 
 const router = express.Router();
 
@@ -9,6 +10,7 @@ const router = express.Router();
 router.post(
     '/',
     auth(UserRole.CUSTOMER, UserRole.VENDOR, UserRole.ADMIN),
+    communityLimiter,
     CommunityController.createPost
 );
 
