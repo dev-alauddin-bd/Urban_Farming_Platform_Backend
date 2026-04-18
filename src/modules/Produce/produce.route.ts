@@ -6,35 +6,34 @@ import { produceLimiter } from '../../middlewares/rateLimiter.js';
 
 const router = express.Router();
 
-// CREATE
+// ============================CREATE============================
 router.post(
     '/',
     auth(UserRole.VENDOR, UserRole.ADMIN),
     ProduceController.createProduce
 );
 
-// GET ALL 
+// ============================GET ALL ============================
 router.get(
     '/',
     produceLimiter,
     ProduceController.getAllProduces
 );
 
-// GET SINGLE 
+// ===============================GET SINGLE ===============================
 router.get(
     '/:id',
-   
     ProduceController.getSingleProduce
 );
 
-// UPDATE
+// ============================UPDATE ============================
 router.patch(
     '/:id',
     auth(UserRole.VENDOR, UserRole.ADMIN),
     ProduceController.updateProduce
 );
 
-// DELETE
+// ============================DELETE ============================
 router.delete(
     '/:id',
     auth(UserRole.VENDOR, UserRole.ADMIN),
