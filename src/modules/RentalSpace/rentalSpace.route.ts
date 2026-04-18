@@ -16,7 +16,7 @@ router.post(
 // ================= GET ALL =================
 router.get(
     '/',
- 
+
     RentalSpaceController.getAllRentalSpaces
 );
 

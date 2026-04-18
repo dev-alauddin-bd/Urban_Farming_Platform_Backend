@@ -12,7 +12,6 @@ const app: Application = express();
 
 // ================= SWAGGER =================
 setupSwagger(app as any);
-
 // ================= CORS =================
 app.use(
     cors({
@@ -30,7 +29,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(process.cwd(), "public")));
 
 // ================= ROOT UI =================
-app.get("/", (req, res) => {
+app.get("/api/v1", (req, res) => {
     res.sendFile(path.join(process.cwd(), "public/index.html"));
 });
 
