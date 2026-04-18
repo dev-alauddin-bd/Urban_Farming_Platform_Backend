@@ -1,15 +1,45 @@
+# =========================
+# Stage 1: Builder
+# =========================
+FROM node:22-alpine AS builder
+
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+RUN npm install
+
+COPY prisma ./prisma/
+COPY prisma.config.ts ./
+
+# Prisma generate (build-time safe dummy env)
+RUN DATABASE_URL="postgresql://placeholder:5432" npx prisma generate
+
+COPY . .
+
+RUN npm run build
+
+
+# =========================
+# Stage 2: Production
+# =========================
 FROM node:22-alpine
 
 WORKDIR /app
 
-COPY package*.json ./
-RUN npm install
+ENV NODE_ENV=production
 
-COPY . .
+COPY package.json package-lock.json ./
+RUN npm install --omit=dev
 
-RUN npx prisma generate
-RUN npm run build
+COPY prisma ./prisma/
+COPY prisma.config.ts ./
+
+# Prisma generate again for runtime
+RUN DATABASE_URL="postgresql://placeholder:5432" npx prisma generate
+
+COPY --from=builder /app/dist ./dist
 
 EXPOSE 5000
 
-CMD ["npm", "run", "start"]
+# Start app
+CMD ["sh", "-c", "npx prisma migrate deploy && node dist/server.js"]
