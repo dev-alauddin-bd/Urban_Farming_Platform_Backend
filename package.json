@@ -3,13 +3,14 @@
   "version": "1.0.0",
   "description": "",
   "main": "src/server.ts",
-  "scripts": {
-    "dev": "tsx watch src/server.ts",
-    "build": "tsc",
-    "start": "node dist/server.js",
-    "seed": "tsx src/db/seed.ts",
-    "typecheck": "tsc --noEmit"
-  },
+"scripts": {
+  "dev": "tsx watch src/server.ts",
+  "build": "prisma generate && tsc",
+  "start": "node dist/server.js",
+  "seed": "tsx src/db/seed.ts",
+  "typecheck": "tsc --noEmit",
+  "prisma:generate": "prisma generate"
+},
   "keywords": [],
   "author": "",
   "license": "ISC",
