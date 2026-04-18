@@ -29,7 +29,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(process.cwd(), "public")));
 
 // ================= ROOT UI =================
-app.get("/api/v1", (req, res) => {
+app.get("/", (req, res) => {
     res.sendFile(path.join(process.cwd(), "public/index.html"));
 });
 
