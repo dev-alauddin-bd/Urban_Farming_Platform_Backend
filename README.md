@@ -5,6 +5,12 @@ This is a **scalable backend API** for an Interactive Urban Farming Platform tha
 
 ---
 
+## 🌍 Live Demo
+
+🔗 Base URL: https://urbanfarmingplatformbackend-production.up.railway.app/
+
+---
+
 ## 🌟 Features
 
 - 🔐 User Authentication & Role-Based Access Control (Admin, Vendor, Customer)
