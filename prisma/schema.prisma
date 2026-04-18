@@ -73,7 +73,7 @@ model VendorProfile {
   isDeleted           Boolean              @default(false)
   createdAt           DateTime             @default(now())
   updatedAt           DateTime             @updatedAt
-  produce             Produce?
+  produces            Produce[]
   rentalSpaces        RentalSpace[]
   sustainabilityCerts SustainabilityCert[]
 
@@ -94,7 +94,7 @@ model Produce {
   price               Decimal             @db.Decimal(10, 2)
   category            String
   availableQuantity   Int
-  vendorId            String              @unique
+  vendorId            String
   vendor              VendorProfile       @relation(fields: [vendorId], references: [id])
   certificationStatus CertificationStatus
   isDeleted           Boolean             @default(false)
@@ -139,6 +139,7 @@ model CommunityPost {
 
   @@index([userId])
   @@index([isDeleted])
+  @@index([postDate])
   @@map("community_posts")
 }
 

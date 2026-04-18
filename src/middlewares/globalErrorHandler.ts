@@ -19,7 +19,7 @@ const globalErrorHandler = (
   let errorMessages: IErrorMessage[] = [];
 
   // ================= PRISMA ERROR =================
-   if (error instanceof Prisma.PrismaClientKnownRequestError) {
+  if (error instanceof Prisma.PrismaClientKnownRequestError) {
     statusCode = 400;
     message = "Database Error";
 

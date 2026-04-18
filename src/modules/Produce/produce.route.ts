@@ -5,35 +5,39 @@ import { UserRole } from '@prisma/client';
 
 const router = express.Router();
 
-// ===================================== Create Produce =====================================
+// CREATE
 router.post(
     '/',
     auth(UserRole.VENDOR, UserRole.ADMIN),
     ProduceController.createProduce
 );
 
+// GET ALL 
+router.get(
+    '/',
 
-// ===================================== Get All Produces =====================================
-router.get('/', ProduceController.getAllProduces);
+    ProduceController.getAllProduces
+);
 
+// GET SINGLE 
+router.get(
+    '/:id',
+   
+    ProduceController.getSingleProduce
+);
 
-// ===================================== Get Single Produce =====================================
-router.get('/:id', ProduceController.getSingleProduce);
-
-
-// ===================================== Update Produce =====================================
+// UPDATE
 router.patch(
     '/:id',
     auth(UserRole.VENDOR, UserRole.ADMIN),
     ProduceController.updateProduce
 );
 
-
-// ===================================== Delete Produce =====================================
+// DELETE
 router.delete(
     '/:id',
     auth(UserRole.VENDOR, UserRole.ADMIN),
     ProduceController.deleteProduce
 );
 
-export const ProduceRoutes : Router= router;
+export const ProduceRoutes: Router = router;

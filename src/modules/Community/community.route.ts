@@ -1,19 +1,22 @@
 import express, { Router } from 'express';
 import { CommunityController } from './community.controller.js';
 import auth from '../../middlewares/auth.js';
+import { UserRole } from '@prisma/client';
 
 const router = express.Router();
 
-// ==================== Create Post ====================
-
+// ================= CREATE POST =================
 router.post(
     '/',
-    auth(),
+    auth(UserRole.CUSTOMER, UserRole.VENDOR, UserRole.ADMIN),
     CommunityController.createPost
 );
 
-// ==================== Get All Posts ====================
+// ================= GET ALL POSTS (cached + paginated) =================
+router.get(
+    '/',
 
-router.get('/', CommunityController.getAllPosts);
+    CommunityController.getAllPosts
+);
 
 export const CommunityRoutes: Router = router;

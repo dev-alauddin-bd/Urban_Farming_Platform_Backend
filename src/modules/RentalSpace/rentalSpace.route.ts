@@ -1,28 +1,44 @@
 import express, { Router } from 'express';
-
 import { UserRole } from '@prisma/client';
 import auth from '../../middlewares/auth.js';
+
 import { RentalSpaceController } from './rentalSpace.controller.js';
 
 const router = express.Router();
 
-// ===================================== Create Rental Space =====================================
+// ================= CREATE RENTAL SPACE =================
 router.post(
     '/',
-    auth(UserRole.VENDOR, UserRole.ADMIN),
+    auth(UserRole.VENDOR),
     RentalSpaceController.createRentalSpace
 );
 
-// ===================================== Get All Rental Spaces =====================================
-router.get('/', RentalSpaceController.getAllRentalSpaces);
+// ================= GET ALL =================
+router.get(
+    '/',
+ 
+    RentalSpaceController.getAllRentalSpaces
+);
 
-// ===================================== Get Single Rental Space =====================================
-router.get('/:id', RentalSpaceController.getSingleRentalSpace);
+// ================= GET SINGLE  =================
+router.get(
+    '/:id',
 
-// ===================================== Update Rental Space =====================================
-router.patch('/:id', auth(UserRole.VENDOR, UserRole.ADMIN), RentalSpaceController.updateRentalSpace);
+    RentalSpaceController.getSingleRentalSpace
+);
 
-// ===================================== Delete Rental Space =====================================
-router.delete('/:id', auth(UserRole.VENDOR, UserRole.ADMIN), RentalSpaceController.deleteRentalSpace);
+// ================= UPDATE =================
+router.patch(
+    '/:id',
+    auth(UserRole.VENDOR),
+    RentalSpaceController.updateRentalSpace
+);
 
-export const RentalSpaceRoutes :Router= router;
+// ================= DELETE =================
+router.delete(
+    '/:id',
+    auth(UserRole.VENDOR),
+    RentalSpaceController.deleteRentalSpace
+);
+
+export const RentalSpaceRoutes: Router = router;

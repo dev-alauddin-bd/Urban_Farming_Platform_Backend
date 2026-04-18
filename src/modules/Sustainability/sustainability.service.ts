@@ -1,6 +1,10 @@
-import { CertificationStatus, SustainabilityCert } from '@prisma/client';
-import { prisma } from '../../lib/prisma.js';
-import { TokenPayload } from '../../utils/generateTokens.js';
+import {
+    CertificationStatus,
+    SustainabilityCert,
+    Prisma,
+} from "@prisma/client";
+import { prisma } from "../../lib/prisma.js";
+import { TokenPayload } from "../../utils/generateTokens.js";
 
 type IUploadCertificationRequest = {
     certifyingAgency: string;
@@ -9,54 +13,102 @@ type IUploadCertificationRequest = {
 };
 
 // ==================== Upload Certification ====================
-
-const uploadCertification = async (data: IUploadCertificationRequest, user: TokenPayload): Promise<SustainabilityCert> => {
-    const vendor = await prisma.vendorProfile.findUnique({
-        where: { userId: user.id },
+const uploadCertification = async (
+    data: IUploadCertificationRequest,
+    user: TokenPayload
+): Promise<SustainabilityCert> => {
+    const vendor = await prisma.vendorProfile.findFirst({
+        where: {
+            userId: user.id,
+            isDeleted: false, // ✅ FIX
+        },
+        select: { id: true },
     });
 
     if (!vendor) {
-        throw new Error('Vendor profile not found!');
+        throw new Error("Vendor profile not found!");
     }
 
-    const result = await prisma.sustainabilityCert.create({
+    // ✅ safe date parse
+    const parsedDate = new Date(data.certificationDate);
+    if (isNaN(parsedDate.getTime())) {
+        throw new Error("Invalid certification date!");
+    }
+
+    return prisma.sustainabilityCert.create({
         data: {
-            ...data,
-            certificationDate: new Date(data.certificationDate),
+            certifyingAgency: data.certifyingAgency,
+            certificationDate: parsedDate,
+            fileUrl: data.fileUrl,
             vendorId: vendor.id,
         },
     });
-
-    return result;
 };
 
 // ==================== Get All Certifications ====================
 const getAllCertifications = async () => {
-    const result = await prisma.sustainabilityCert.findMany({
-        include: { vendor: true },
+    return prisma.sustainabilityCert.findMany({
+        where: {
+            isDeleted: false, // ✅ FIX
+        },
+
+        orderBy: {
+            createdAt: "desc", // ✅ indexed field use
+        },
+
+        select: {
+            id: true,
+            certifyingAgency: true,
+            certificationDate: true,
+            fileUrl: true,
+            status: true,
+            createdAt: true,
+
+            vendor: {
+                select: {
+                    id: true,
+                    farmName: true,
+                    farmLocation: true,
+                    certificationStatus: true,
+                },
+            },
+        },
     });
-    return result;
 };
 
-// ==================== Validate Certification ====================
-const validateCertification = async (id: string, data: { status: CertificationStatus }) => {
-    const result = await prisma.sustainabilityCert.update({
-        where: { id },
-        data: { status: data.status },
-    });
-
-    if (data.status === CertificationStatus.APPROVED) {
-        await prisma.vendorProfile.update({
-            where: { id: result.vendorId },
-            data: { certificationStatus: CertificationStatus.APPROVED },
+// ==================== Validate Certification (TRANSACTION FIX) ====================
+const validateCertification = async (
+    id: string,
+    data: { status: CertificationStatus }
+) => {
+    return prisma.$transaction(async (tx) => {
+        const cert = await tx.sustainabilityCert.update({
+            where: { id },
+            data: {
+                status: data.status,
+            },
+            select: {
+                id: true,
+                status: true,
+                vendorId: true,
+            },
         });
-    }
 
-    return result;
+        // ✅ sync vendor status
+        if (data.status === CertificationStatus.APPROVED) {
+            await tx.vendorProfile.update({
+                where: { id: cert.vendorId },
+                data: {
+                    certificationStatus: CertificationStatus.APPROVED,
+                },
+            });
+        }
+
+        return cert;
+    });
 };
 
-// ==================== Export Service ====================
-
+// ==================== Export ====================
 export const SustainabilityService = {
     uploadCertification,
     getAllCertifications,

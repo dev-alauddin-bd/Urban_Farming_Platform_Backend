@@ -3,9 +3,9 @@
   "compilerOptions": {
     "rootDir": "./src",
     "outDir": "./dist",
-    "module": "NodeNext",
     "target": "es2022",
-    "moduleResolution": "nodenext",
+     "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "esModuleInterop": true,
     "declaration": true,
     "sourceMap": true,
@@ -14,7 +14,8 @@
     "skipLibCheck": true
   },
   "include": [
-    "src/**/*"
+    "src/**/*",
+    "src/db/seed.ts"
   ],
   "exclude": [
     "node_modules",

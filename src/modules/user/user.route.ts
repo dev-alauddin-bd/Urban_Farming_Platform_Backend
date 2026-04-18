@@ -5,22 +5,49 @@ import { UserRole } from "@prisma/client";
 
 const router = express.Router();
 
-// ================= Get my profile =================
-router.get("/me", auth(), UserController.getMyProfile);
+// ================= MY PROFILE =================
+router.get(
+    "/me",
+    auth(UserRole.CUSTOMER, UserRole.VENDOR, UserRole.ADMIN),
 
-// ================= Update my profile =================
-router.patch("/me", auth(), UserController.updateMyProfile);
+    UserController.getMyProfile
+);
 
-// ================= Get all users (Admin only) =================
-router.get("/", auth(UserRole.ADMIN), UserController.getAllUsers);
+// ================= UPDATE MY PROFILE =================
+router.patch(
+    "/me",
+    auth(UserRole.CUSTOMER, UserRole.VENDOR, UserRole.ADMIN),
+    UserController.updateMyProfile
+);
 
-// ================= Get single user (Admin only) =================
-router.get("/:id", auth(UserRole.ADMIN), UserController.getSingleUser);
+// ================= GET ALL USERS =================
+router.get(
+    "/",
+    auth(UserRole.ADMIN),
+ 
+    UserController.getAllUsers
+);
 
-// ================= Change user status (Admin only) =================
-router.patch("/:id/status", auth(UserRole.ADMIN), UserController.changeUserStatus);
+// ================= GET SINGLE USER =================
+router.get(
+    "/:id",
+    auth(UserRole.ADMIN),
+   
+    UserController.getSingleUser
+);
 
-// ================= Delete user (Admin only) =================
-router.delete("/:id", auth(UserRole.ADMIN), UserController.deleteUser);
+// ================= CHANGE STATUS =================
+router.patch(
+    "/:id/status",
+    auth(UserRole.ADMIN),
+    UserController.changeUserStatus
+);
+
+// ================= DELETE USER =================
+router.delete(
+    "/:id",
+    auth(UserRole.ADMIN),
+    UserController.deleteUser
+);
 
 export const UserRoutes: Router = router;

@@ -1,6 +1,5 @@
 import express, { Router } from "express";
 import { AuthController } from "./auth.controller.js";
-import { authRateLimiter } from "../../middlewares/rateLimiter.js";
 
 const router = express.Router();
 
@@ -25,7 +24,7 @@ const router = express.Router();
  *       201:
  *         description: User registered successfully
  */
-router.post("/register", authRateLimiter, AuthController.registerUser);
+router.post("/register", AuthController.registerUser);
 
 /**
  * @swagger
@@ -46,7 +45,7 @@ router.post("/register", authRateLimiter, AuthController.registerUser);
  *       200:
  *         description: Login successful
  */
-router.post("/login", authRateLimiter, AuthController.loginUser);
+router.post("/login", AuthController.loginUser);
 
 /**
  * @swagger

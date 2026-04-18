@@ -1,13 +1,69 @@
 import express from "express";
 import { AuthController } from "./auth.controller.js";
 const router = express.Router();
-// ============================================ Register =============================================
+/**
+ * @swagger
+ * /auth/register:
+ *   post:
+ *     summary: Register a new user
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name: {type: string}
+ *               email: {type: string}
+ *               password: {type: string}
+ *               role: {type: string, enum: [CUSTOMER, VENDOR]}
+ *     responses:
+ *       201:
+ *         description: User registered successfully
+ */
 router.post("/register", AuthController.registerUser);
-// ============================================ Login =============================================
+/**
+ * @swagger
+ * /auth/login:
+ *   post:
+ *     summary: Login a user
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email: {type: string}
+ *               password: {type: string}
+ *     responses:
+ *       200:
+ *         description: Login successful
+ */
 router.post("/login", AuthController.loginUser);
-// ============================================ Logout =============================================
+/**
+ * @swagger
+ * /auth/logout:
+ *   post:
+ *     summary: Logout a user
+ *     tags: [Auth]
+ *     responses:
+ *       200:
+ *         description: Logout successful
+ */
 router.post("/logout", AuthController.logoutUser);
-// ============================================ Refresh Token =============================================
+/**
+ * @swagger
+ * /auth/refresh-token:
+ *   post:
+ *     summary: Refresh access token
+ *     tags: [Auth]
+ *     responses:
+ *       200:
+ *         description: Token refreshed successfully
+ */
 router.post("/refresh-token", AuthController.refreshToken);
 export const AuthRoutes = router;
 //# sourceMappingURL=auth.route.js.map

@@ -4,7 +4,10 @@ import cookieParser from "cookie-parser";
 import path from "path";
 import router from "./routes/index.js";
 import globalErrorHandler from "./middlewares/globalErrorHandler.js";
+import { setupSwagger } from "./utils/swagger.js";
 const app = express();
+// ================= SWAGGER =================
+setupSwagger(app);
 // ================= CORS =================
 app.use(cors({
     origin: "http://localhost:3000",

@@ -1,39 +1,27 @@
-import { Prisma, Produce } from "@prisma/client";
+import { Prisma, Produce, CertificationStatus } from "@prisma/client";
 import { TokenPayload } from "../../utils/generateTokens.js";
 type IProduceFilterRequest = {
     searchTerm?: string;
     category?: string;
-    certificationStatus?: string;
+    certificationStatus?: CertificationStatus;
 };
 type IPaginationOptions = {
     page?: number;
     limit?: number;
     sortBy?: string;
-    sortOrder?: 'asc' | 'desc';
+    sortOrder?: "asc" | "desc";
 };
 export declare const ProduceService: {
-    createProduce: (data: Produce, user: TokenPayload) => Promise<Produce>;
+    createProduce: (data: Omit<Produce, "id" | "vendorId" | "createdAt" | "updatedAt">, user: TokenPayload) => Promise<Produce>;
     getAllProduces: (filters: IProduceFilterRequest, options: IPaginationOptions) => Promise<{
         meta: {
             total: number;
             page: number;
             limit: number;
         };
-        data: ({
-            vendor: {
-                id: string;
-                isDeleted: boolean;
-                createdAt: Date;
-                updatedAt: Date;
-                farmName: string;
-                farmLocation: string;
-                certificationStatus: string;
-                userId: string;
-            };
-        } & {
-            name: string;
+        data: {
             id: string;
-            isDeleted: boolean;
+            name: string;
             createdAt: Date;
             updatedAt: Date;
             certificationStatus: import("@prisma/client").$Enums.CertificationStatus;
@@ -41,58 +29,33 @@ export declare const ProduceService: {
             price: Prisma.Decimal;
             category: string;
             availableQuantity: number;
-            vendorId: string;
-        })[];
+            vendor: {
+                id: string;
+                farmName: string;
+                farmLocation: string;
+                certificationStatus: string;
+            };
+        }[];
     }>;
-    getSingleProduceFromDB: (id: string) => Promise<({
+    getSingleProduceFromDB: (id: string) => Promise<{
+        id: string;
+        name: string;
+        createdAt: Date;
+        updatedAt: Date;
+        certificationStatus: import("@prisma/client").$Enums.CertificationStatus;
+        description: string;
+        price: Prisma.Decimal;
+        category: string;
+        availableQuantity: number;
         vendor: {
             id: string;
-            isDeleted: boolean;
-            createdAt: Date;
-            updatedAt: Date;
             farmName: string;
             farmLocation: string;
             certificationStatus: string;
             userId: string;
         };
-    } & {
-        name: string;
-        id: string;
-        isDeleted: boolean;
-        createdAt: Date;
-        updatedAt: Date;
-        certificationStatus: import("@prisma/client").$Enums.CertificationStatus;
-        description: string;
-        price: Prisma.Decimal;
-        category: string;
-        availableQuantity: number;
-        vendorId: string;
-    }) | null>;
-    updateProduceInDB: (id: string, payload: Partial<Produce>) => Promise<{
-        name: string;
-        id: string;
-        isDeleted: boolean;
-        createdAt: Date;
-        updatedAt: Date;
-        certificationStatus: import("@prisma/client").$Enums.CertificationStatus;
-        description: string;
-        price: Prisma.Decimal;
-        category: string;
-        availableQuantity: number;
-        vendorId: string;
-    }>;
-    deleteProduceFromDB: (id: string) => Promise<{
-        name: string;
-        id: string;
-        isDeleted: boolean;
-        createdAt: Date;
-        updatedAt: Date;
-        certificationStatus: import("@prisma/client").$Enums.CertificationStatus;
-        description: string;
-        price: Prisma.Decimal;
-        category: string;
-        availableQuantity: number;
-        vendorId: string;
-    }>;
+    } | null>;
+    updateProduceInDB: (id: string, payload: Partial<Produce>) => Promise<Produce>;
+    deleteProduceFromDB: (id: string) => Promise<Produce>;
 };
 export {};

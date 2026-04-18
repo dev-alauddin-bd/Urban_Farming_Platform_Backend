@@ -1,4 +1,4 @@
-import { Prisma, Produce } from "@prisma/client";
+import { Prisma, Produce, CertificationStatus } from "@prisma/client";
 import { prisma } from "../../lib/prisma.js";
 import { paginationHelpers } from "../../utils/pagination.js";
 import { TokenPayload } from "../../utils/generateTokens.js";
@@ -6,145 +6,212 @@ import { TokenPayload } from "../../utils/generateTokens.js";
 type IProduceFilterRequest = {
     searchTerm?: string;
     category?: string;
-    certificationStatus?: string;
+    certificationStatus?: CertificationStatus;
 };
 
 type IPaginationOptions = {
     page?: number;
     limit?: number;
     sortBy?: string;
-    sortOrder?: 'asc' | 'desc';
+    sortOrder?: "asc" | "desc";
 };
 
-// ===================================== Create Produce =====================================
-const createProduce = async (data: Produce, user: TokenPayload): Promise<Produce> => {
+// ================= CREATE =================
+const createProduce = async (
+    data: Omit<Produce, "id" | "vendorId" | "createdAt" | "updatedAt">,
+    user: TokenPayload
+): Promise<Produce> => {
     const vendor = await prisma.vendorProfile.findUnique({
         where: { userId: user.id },
     });
 
     if (!vendor) {
-        throw new Error('Vendor profile not found!');
+        throw new Error("Vendor profile not found!");
     }
 
-    const result = await prisma.produce.create({
+    return prisma.produce.create({
         data: {
             ...data,
             vendorId: vendor.id,
         },
     });
-
-    return result;
 };
 
-// ===================================== Get All Produces =====================================
-const getAllProduces = async (filters: IProduceFilterRequest, options: IPaginationOptions) => {
+// ================= GET ALL =================
+const getAllProduces = async (
+    filters: IProduceFilterRequest,
+    options: IPaginationOptions
+) => {
     const { limit, page, skip, sortBy, sortOrder } =
         paginationHelpers.calculatePagination(options);
 
-    const { searchTerm, ...filterData } = filters;
+    const { searchTerm, category, certificationStatus } = filters;
 
     const andConditions: Prisma.ProduceWhereInput[] = [];
 
+    // 🔍 search
     if (searchTerm) {
         andConditions.push({
             OR: [
                 {
                     name: {
                         contains: searchTerm,
-                        mode: 'insensitive',
+                        mode: "insensitive",
                     },
                 },
                 {
                     description: {
                         contains: searchTerm,
-                        mode: 'insensitive',
+                        mode: "insensitive",
                     },
                 },
             ],
         });
     }
 
-    if (Object.keys(filterData).length > 0) {
+    // 🎯 category
+    if (category) {
         andConditions.push({
-            AND: (Object.keys(filterData) as (keyof typeof filterData)[]).map((key) => ({
-                [key]: {
-                    equals: filterData[key],
-                },
-            })),
+            category: {
+                equals: category,
+                mode: "insensitive",
+            },
         });
     }
 
-    const whereConditions: Prisma.ProduceWhereInput =
-        andConditions.length > 0 ? { AND: andConditions } : {};
+    // ✅ enum safe filter
+    if (certificationStatus) {
+        andConditions.push({
+            certificationStatus,
+        });
+    }
 
-    const result = await prisma.produce.findMany({
-        where: whereConditions,
-        skip,
-        take: limit,
-        orderBy: {
-            [sortBy]: sortOrder,
-        },
-        include: {
-            vendor: true,
-        },
-    });
+    // ✅ ALWAYS include soft delete filter
+    const where: Prisma.ProduceWhereInput = {
+        AND: [
+            { isDeleted: false },
+            ...andConditions,
+        ],
+    };
 
-    const total = await prisma.produce.count({
-        where: whereConditions,
-    });
+    // ✅ safe sorting
+    const allowedSortFields = [
+        "createdAt",
+        "price",
+        "availableQuantity",
+        "updatedAt",
+    ];
+
+    const safeSortBy = allowedSortFields.includes(sortBy || "")
+        ? sortBy!
+        : "createdAt";
+
+    const orderBy: Prisma.ProduceOrderByWithRelationInput = {
+        [safeSortBy]: sortOrder === "asc" ? "asc" : "desc",
+    };
+
+    const [data, total] = await Promise.all([
+        prisma.produce.findMany({
+            where,
+            skip,
+            take: limit,
+            orderBy,
+
+            select: {
+                id: true,
+                name: true,
+                description: true,
+                price: true,
+                category: true,
+                availableQuantity: true,
+                certificationStatus: true,
+                createdAt: true,
+                updatedAt: true,
+
+                vendor: {
+                    select: {
+                        id: true,
+                        farmName: true,
+                        farmLocation: true,
+                        certificationStatus: true,
+                    },
+                },
+            },
+        }),
+
+        prisma.produce.count({ where }),
+    ]);
 
     return {
         meta: {
             total,
-            page,
-            limit,
+            page: page || 1,
+            limit: limit || 10,
         },
-        data: result,
+        data,
     };
 };
 
-// ===================================== Get Single Produce =====================================
+// ================= GET SINGLE =================
 const getSingleProduceFromDB = async (id: string) => {
-    const result = await prisma.produce.findUnique({
+    return prisma.produce.findFirst({
         where: {
             id,
             isDeleted: false,
         },
-        include: {
-            vendor: true,
+
+        select: {
+            id: true,
+            name: true,
+            description: true,
+            price: true,
+            category: true,
+            availableQuantity: true,
+            certificationStatus: true,
+            createdAt: true,
+            updatedAt: true,
+
+            vendor: {
+                select: {
+                    id: true,
+                    farmName: true,
+                    farmLocation: true,
+                    certificationStatus: true,
+                    userId: true,
+                },
+            },
         },
     });
-
-    return result;
 };
 
-// ===================================== Update Produce =====================================
-const updateProduceInDB = async (id: string, payload: Partial<Produce>) => {
-    const result = await prisma.produce.update({
+// ================= UPDATE =================
+const updateProduceInDB = async (
+    id: string,
+    payload: Partial<Produce>
+): Promise<Produce> => {
+    return prisma.produce.update({
         where: {
             id,
+            isDeleted: false, // ✅ safety
         },
         data: payload,
     });
-
-    return result;
 };
 
-// ===================================== Delete Produce =====================================
-const deleteProduceFromDB = async (id: string) => {
-    const result = await prisma.produce.update({
+// ================= DELETE =================
+const deleteProduceFromDB = async (id: string): Promise<Produce> => {
+    return prisma.produce.update({
         where: {
             id,
+            isDeleted: false, // ✅ safety
         },
         data: {
             isDeleted: true,
         },
     });
-
-    return result;
 };
 
-// ===================================== Export Produce Service =====================================
+// ================= EXPORT =================
 export const ProduceService = {
     createProduce,
     getAllProduces,

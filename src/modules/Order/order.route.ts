@@ -5,18 +5,27 @@ import { UserRole } from '@prisma/client';
 
 const router = express.Router();
 
-// ===================================== Create Order =====================================
+// ================= CREATE ORDER =================
 router.post(
     '/',
-    auth(UserRole.CUSTOMER, UserRole.ADMIN),
+    auth(UserRole.CUSTOMER),
     OrderController.createOrder
 );
 
-// ===================================== Get My Orders =====================================
+// ================= MY ORDERS (cached) =================
 router.get(
     '/my-orders',
-    auth(UserRole.CUSTOMER, UserRole.ADMIN),
+    auth(UserRole.CUSTOMER),
+
     OrderController.getMyOrders
+);
+
+// ================= VENDOR ORDERS (cached) =================
+router.get(
+    '/vendor-orders',
+    auth(UserRole.VENDOR),
+
+    OrderController.getVendorOrders
 );
 
 export const OrderRoutes: Router = router;

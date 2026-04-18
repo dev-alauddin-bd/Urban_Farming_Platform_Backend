@@ -1,18 +1,16 @@
-import { User, UserRole, UserStatus } from "@prisma/client";
+import { User, UserStatus, Prisma } from "@prisma/client";
 import { prisma } from "../../lib/prisma.js";
 import AppError from "../../error/AppError.js";
 import httpStatus from "http-status";
 import { TokenPayload } from "../../utils/generateTokens.js";
 
-/**
- * Get all users from DB
- * @returns List of users (excluding passwords)
- */
+// ================= GET ALL USERS =================
 const getAllUsersFromDB = async () => {
-    const result = await prisma.user.findMany({
+    return prisma.user.findMany({
         where: {
             isDeleted: false,
         },
+
         select: {
             id: true,
             name: true,
@@ -21,23 +19,32 @@ const getAllUsersFromDB = async () => {
             status: true,
             createdAt: true,
             updatedAt: true,
-            vendorProfile: true,
+
+            // ❌ avoid full object (performance fix)
+            vendorProfile: {
+                select: {
+                    id: true,
+                    farmName: true,
+                    farmLocation: true,
+                    certificationStatus: true,
+                },
+            },
+        },
+
+        orderBy: {
+            createdAt: "desc",
         },
     });
-    return result;
 };
 
-/**
- * Get single user by ID
- * @param id User ID
- * @returns User object (excluding password)
- */
+// ================= GET SINGLE USER =================
 const getSingleUserFromDB = async (id: string) => {
-    const result = await prisma.user.findUnique({
+    const result = await prisma.user.findFirst({
         where: {
             id,
             isDeleted: false,
         },
+
         select: {
             id: true,
             name: true,
@@ -46,7 +53,15 @@ const getSingleUserFromDB = async (id: string) => {
             status: true,
             createdAt: true,
             updatedAt: true,
-            vendorProfile: true,
+
+            vendorProfile: {
+                select: {
+                    id: true,
+                    farmName: true,
+                    farmLocation: true,
+                    certificationStatus: true,
+                },
+            },
         },
     });
 
@@ -57,17 +72,14 @@ const getSingleUserFromDB = async (id: string) => {
     return result;
 };
 
-/**
- * Get my profile (logged in user)
- * @param user User payload from token
- * @returns User profile
- */
+// ================= MY PROFILE =================
 const getMyProfileFromDB = async (user: TokenPayload) => {
-    const result = await prisma.user.findUnique({
+    const result = await prisma.user.findFirst({
         where: {
             id: user.id,
             isDeleted: false,
         },
+
         select: {
             id: true,
             name: true,
@@ -76,7 +88,15 @@ const getMyProfileFromDB = async (user: TokenPayload) => {
             status: true,
             createdAt: true,
             updatedAt: true,
-            vendorProfile: true,
+
+            vendorProfile: {
+                select: {
+                    id: true,
+                    farmName: true,
+                    farmLocation: true,
+                    certificationStatus: true,
+                },
+            },
         },
     });
 
@@ -87,15 +107,12 @@ const getMyProfileFromDB = async (user: TokenPayload) => {
     return result;
 };
 
-/**
- * Update my profile
- * @param user User payload from token
- * @param payload Update data
- * @returns Updated user
- */
-const updateMyProfileInDB = async (user: TokenPayload, payload: Partial<User>) => {
-    // 1. Check if user exists
-    const isExistUser = await prisma.user.findUnique({
+// ================= UPDATE PROFILE =================
+const updateMyProfileInDB = async (
+    user: TokenPayload,
+    payload: Partial<User>
+) => {
+    const isExistUser = await prisma.user.findFirst({
         where: {
             id: user.id,
             isDeleted: false,
@@ -106,12 +123,16 @@ const updateMyProfileInDB = async (user: TokenPayload, payload: Partial<User>) =
         throw new AppError(httpStatus.NOT_FOUND, "User not found!");
     }
 
-    // 2. Update user info
-    const result = await prisma.user.update({
+    // ❌ prevent role/status hacking from body
+    const { role, status, isDeleted, ...safePayload } = payload as any;
+
+    return prisma.user.update({
         where: {
             id: user.id,
         },
-        data: payload,
+
+        data: safePayload,
+
         select: {
             id: true,
             name: true,
@@ -122,47 +143,45 @@ const updateMyProfileInDB = async (user: TokenPayload, payload: Partial<User>) =
             updatedAt: true,
         },
     });
-
-    return result;
 };
 
-/**
- * Delete user (Soft delete)
- * @param id User ID
- * @returns Deleted user
- */
+// ================= SOFT DELETE USER =================
 const deleteUserFromDB = async (id: string) => {
-    const result = await prisma.user.update({
-        where: {
-            id,
-        },
+    const user = await prisma.user.findUnique({
+        where: { id },
+    });
+
+    if (!user) {
+        throw new AppError(httpStatus.NOT_FOUND, "User not found!");
+    }
+
+    return prisma.user.update({
+        where: { id },
         data: {
             isDeleted: true,
         },
     });
-
-    return result;
 };
 
-/**
- * Change user status (Block/Unblock) - Admin only
- * @param id User ID
- * @param status New status
- * @returns Updated user
- */
+// ================= CHANGE STATUS =================
 const changeUserStatusInDB = async (id: string, status: UserStatus) => {
-    const result = await prisma.user.update({
-        where: {
-            id,
-        },
+    const user = await prisma.user.findUnique({
+        where: { id },
+    });
+
+    if (!user) {
+        throw new AppError(httpStatus.NOT_FOUND, "User not found!");
+    }
+
+    return prisma.user.update({
+        where: { id },
         data: {
             status,
         },
     });
-
-    return result;
 };
 
+// ================= EXPORT =================
 export const UserService = {
     getAllUsersFromDB,
     getSingleUserFromDB,

@@ -5,30 +5,25 @@ import { UserRole } from '@prisma/client';
 
 const router = express.Router();
 
-// ==================== Upload Certification ====================
-
+// ================= UPLOAD CERT =================
 router.post(
     '/upload',
-    auth(UserRole.VENDOR, UserRole.ADMIN),
+    auth(UserRole.VENDOR),
     SustainabilityController.uploadCertification
 );
 
-// ==================== Get All Certifications ====================
-
+// ================= GET ALL CERTS  =================
 router.get(
     '/',
     auth(UserRole.ADMIN),
     SustainabilityController.getAllCertifications
 );
 
-// ==================== Validate Certification ====================
-
+// ================= VALIDATE CERT =================
 router.patch(
     '/:id/validate',
     auth(UserRole.ADMIN),
     SustainabilityController.validateCertification
 );
-
-// ==================== Export Route ====================
 
 export const SustainabilityRoutes: Router = router;

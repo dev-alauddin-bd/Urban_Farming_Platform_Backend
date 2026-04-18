@@ -2,9 +2,23 @@ import httpStatus from "http-status";
 import catchAsync from "../../utils/catchAsync.js";
 import sendResponse from "../../utils/sendResponse.js";
 import { UserService } from "./user.service.js";
-// ==================== Get All Users ====================
+import NodeCache from "node-cache";
+// ================= CACHE =================
+const cache = new NodeCache({ stdTTL: 60 });
+const USERS_CACHE_KEY = "users:list";
+// ================= GET ALL USERS =================
 const getAllUsers = catchAsync(async (req, res) => {
+    const cached = cache.get(USERS_CACHE_KEY);
+    if (cached) {
+        return sendResponse(res, {
+            statusCode: httpStatus.OK,
+            success: true,
+            message: "Users fetched successfully (cache)!",
+            data: cached,
+        });
+    }
     const result = await UserService.getAllUsersFromDB();
+    cache.set(USERS_CACHE_KEY, result);
     sendResponse(res, {
         statusCode: httpStatus.OK,
         success: true,
@@ -12,10 +26,21 @@ const getAllUsers = catchAsync(async (req, res) => {
         data: result,
     });
 });
-// ==================== Get Single User ====================
+// ================= GET SINGLE USER =================
 const getSingleUser = catchAsync(async (req, res) => {
     const { id } = req.params;
+    const cacheKey = `user:${id}`;
+    const cached = cache.get(cacheKey);
+    if (cached) {
+        return sendResponse(res, {
+            statusCode: httpStatus.OK,
+            success: true,
+            message: "User fetched successfully (cache)!",
+            data: cached,
+        });
+    }
     const result = await UserService.getSingleUserFromDB(id);
+    cache.set(cacheKey, result);
     sendResponse(res, {
         statusCode: httpStatus.OK,
         success: true,
@@ -23,10 +48,20 @@ const getSingleUser = catchAsync(async (req, res) => {
         data: result,
     });
 });
-// ==================== Get My Profile ====================
+// ================= MY PROFILE =================
 const getMyProfile = catchAsync(async (req, res) => {
-    const user = req.user;
-    const result = await UserService.getMyProfileFromDB(user);
+    const cacheKey = `profile:${req.user.id}`;
+    const cached = cache.get(cacheKey);
+    if (cached) {
+        return sendResponse(res, {
+            statusCode: httpStatus.OK,
+            success: true,
+            message: "Profile fetched successfully (cache)!",
+            data: cached,
+        });
+    }
+    const result = await UserService.getMyProfileFromDB(req.user);
+    cache.set(cacheKey, result);
     sendResponse(res, {
         statusCode: httpStatus.OK,
         success: true,
@@ -34,10 +69,11 @@ const getMyProfile = catchAsync(async (req, res) => {
         data: result,
     });
 });
-// ==================== Update My Profile ====================
+// ================= UPDATE PROFILE =================
 const updateMyProfile = catchAsync(async (req, res) => {
-    const user = req.user;
-    const result = await UserService.updateMyProfileInDB(user, req.body);
+    const result = await UserService.updateMyProfileInDB(req.user, req.body);
+    // invalidate profile cache
+    cache.del(`profile:${req.user.id}`);
     sendResponse(res, {
         statusCode: httpStatus.OK,
         success: true,
@@ -45,11 +81,14 @@ const updateMyProfile = catchAsync(async (req, res) => {
         data: result,
     });
 });
-// ==================== Change User Status ====================
+// ================= CHANGE STATUS =================
 const changeUserStatus = catchAsync(async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
     const result = await UserService.changeUserStatusInDB(id, status);
+    // invalidate cache
+    cache.del("users:list");
+    cache.del(`user:${id}`);
     sendResponse(res, {
         statusCode: httpStatus.OK,
         success: true,
@@ -57,10 +96,13 @@ const changeUserStatus = catchAsync(async (req, res) => {
         data: result,
     });
 });
-// ==================== Delete User ====================
+// ================= DELETE USER =================
 const deleteUser = catchAsync(async (req, res) => {
     const { id } = req.params;
     const result = await UserService.deleteUserFromDB(id);
+    // invalidate cache
+    cache.del("users:list");
+    cache.del(`user:${id}`);
     sendResponse(res, {
         statusCode: httpStatus.OK,
         success: true,

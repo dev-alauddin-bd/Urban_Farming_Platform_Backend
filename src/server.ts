@@ -1,6 +1,7 @@
 import config from "./config/index.js";
 import app from "./index.js";
 
+
 const port = config.port || 5000;
 
 process.on("uncaughtException", (err) => {

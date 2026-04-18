@@ -5,36 +5,46 @@ import sendResponse from "../../utils/sendResponse.js";
 import AppError from "../../error/AppError.js";
 // ================= REGISTER =================
 const registerUser = catchAsync(async (req, res) => {
-    const result = await AuthService.registerUser(req.body);
+    const { accessToken, refreshToken, user } = await AuthService.registerUser(req.body);
+    res.cookie("accessToken", accessToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: 15 * 60 * 1000,
+    });
+    res.cookie("refreshToken", refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
     sendResponse(res, {
         statusCode: httpStatus.CREATED,
         success: true,
         message: "User registered successfully!",
-        data: result,
+        data: { user, accessToken },
     });
 });
-// ================= LOGIN + COOKIE =================
+// ================= LOGIN =================
 const loginUser = catchAsync(async (req, res) => {
     const { accessToken, refreshToken, user } = await AuthService.loginUser(req.body);
-    // access token cookie
     res.cookie("accessToken", accessToken, {
         httpOnly: true,
-        secure: false, // production: true
-        sameSite: "lax",
-        maxAge: 15 * 60 * 1000, // 15 min
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: 15 * 60 * 1000,
     });
-    // refresh token cookie
     res.cookie("refreshToken", refreshToken, {
         httpOnly: true,
-        secure: false,
-        sameSite: "lax",
-        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: 7 * 24 * 60 * 60 * 1000,
     });
     sendResponse(res, {
         statusCode: httpStatus.OK,
         success: true,
         message: "User logged in successfully!",
-        data: user,
+        data: { user, accessToken },
     });
 });
 // ================= LOGOUT =================
@@ -50,24 +60,22 @@ const logoutUser = catchAsync(async (req, res) => {
 });
 // ================= REFRESH TOKEN =================
 const refreshToken = catchAsync(async (req, res) => {
-    // get token from cookie
     const token = req.cookies?.refreshToken;
     if (!token) {
         throw new AppError(httpStatus.UNAUTHORIZED, "Refresh token not found");
     }
     const result = await AuthService.refreshToken(token);
-    // optional: set new access token cookie
     res.cookie("accessToken", result.accessToken, {
         httpOnly: true,
-        secure: false, // production: true
-        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
         maxAge: 15 * 60 * 1000,
     });
     sendResponse(res, {
         statusCode: httpStatus.OK,
         success: true,
         message: "Token refreshed successfully!",
-        data: null, // usually we don't return token in body when using cookie
+        data: { accessToken: result.accessToken },
     });
 });
 export const AuthController = {
