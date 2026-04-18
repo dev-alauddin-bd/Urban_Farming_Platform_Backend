@@ -9,9 +9,13 @@ COPY package.json package-lock.json ./
 RUN npm install
 
 COPY prisma ./prisma/
+COPY prisma.config.ts ./
+
+# Prisma generate (build-time safe dummy env)
+RUN DATABASE_URL="postgresql://placeholder:5432" npx prisma generate
+
 COPY . .
 
-RUN npx prisma generate
 RUN npm run build
 
 
@@ -28,12 +32,15 @@ COPY package.json package-lock.json ./
 RUN npm install --omit=dev
 
 COPY prisma ./prisma/
+COPY prisma.config.ts ./
 COPY docs ./docs
 
+# Prisma generate again for runtime
+RUN DATABASE_URL="postgresql://placeholder:5432" npx prisma generate
+
 COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 
 EXPOSE 5000
 
+# Start app
 CMD ["sh", "-c", "npx prisma migrate deploy && node dist/index.js"]
