@@ -2,6 +2,7 @@ import express, { Router } from 'express';
 import { ProduceController } from './produce.controller.js';
 import auth from '../../middlewares/auth.js';
 import { UserRole } from '@prisma/client';
+import { produceLimiter } from '../../middlewares/rateLimiter.js';
 
 const router = express.Router();
 
@@ -15,7 +16,7 @@ router.post(
 // GET ALL 
 router.get(
     '/',
-
+    produceLimiter,
     ProduceController.getAllProduces
 );
 

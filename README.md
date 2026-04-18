@@ -1,10 +1,4 @@
-ঠিক আছে 👍 তুমি যেটা চাইছো সেটা হলো **একটা single clean README.md file, কোনো আলাদা section break না দিয়ে continuous full file**।
 
-নিচে তোমার জন্য পুরোটা একসাথে দিলাম 👇
-
----
-
-````md id="full_readme_1"
 # 🚀 Interactive Urban Farming Platform Backend
 
 This is a **scalable backend API** for an Interactive Urban Farming Platform that connects urban farmers, vendors, and customers for sustainable agriculture, produce marketplace, rental farming spaces, and community collaboration.
