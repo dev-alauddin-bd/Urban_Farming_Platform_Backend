@@ -16,7 +16,7 @@ setupSwagger(app as any);
 // ================= CORS =================
 app.use(
     cors({
-        origin: ["https://urban-farming-platform-rosy.vercel.app", "http://localhost:3000", "http://localhost:5000"],
+        origin: ["https://urbanfarmingplatformbackend-production.up.railway.app", "http://localhost:3000",],
         credentials: true,
     })
 );
