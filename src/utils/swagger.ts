@@ -10,5 +10,5 @@ export const setupSwagger = (app: Express) => {
 
   app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-  console.log("📖 Swagger: http://localhost:5000/api-docs");
+  console.log("📖 Swagger: https://urban-farming-platform-backend-rosy.vercel.app/api-docs");
 };
